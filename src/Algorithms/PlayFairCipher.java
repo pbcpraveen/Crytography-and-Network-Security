@@ -78,6 +78,7 @@ public class PlayFairCipher {
         return new char[]{encryptedE1, encryptedE2};
     }
     public String encryptMessage(String message){
+        message = message.replaceAll("\\s", "");
         int n = message.length();
         String encryptedMessage  = "";
         if (n%2==1){

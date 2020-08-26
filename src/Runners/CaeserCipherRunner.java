@@ -26,7 +26,7 @@ public class CaeserCipherRunner {
         }
         else{
             scanner.nextLine();
-            System.out.print("Enter the message to encrypt: ");
+            System.out.print("Enter the message to decrypt: ");
             message = scanner.nextLine();
             message = message.toUpperCase();
             int isKey = 0;

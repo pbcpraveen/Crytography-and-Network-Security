@@ -21,6 +21,7 @@ public class PlayFairCipherRunner {
             message = message.toUpperCase();
             System.out.print("Enter Encryption Key: ");
             k = scanner.next();
+            k = k.toUpperCase();
             playFairCipher.setKey(k);
             playFairCipher.printPlayFairMatrix();
             System.out.println("The encrypted message is:");
@@ -28,11 +29,12 @@ public class PlayFairCipherRunner {
         }
         else{
                 scanner.nextLine();
-                System.out.print("Enter the message to encrypt: ");
+                System.out.print("Enter the message to decrypt: ");
                 message = scanner.nextLine();
                 message = message.toUpperCase();
                 System.out.print("Enter Decryption Key: ");
                 k = scanner.next();
+                k = k.toUpperCase();
                 playFairCipher.setKey(k);
                 System.out.println("The decrypted message is:");
                 System.out.println(playFairCipher.decryptMessage(message));
