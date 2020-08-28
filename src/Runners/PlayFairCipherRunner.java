@@ -36,6 +36,7 @@ public class PlayFairCipherRunner {
                 k = scanner.next();
                 k = k.toUpperCase();
                 playFairCipher.setKey(k);
+                playFairCipher.printPlayFairMatrix();
                 System.out.println("The decrypted message is:");
                 System.out.println(playFairCipher.decryptMessage(message));
         }

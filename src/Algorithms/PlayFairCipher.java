@@ -18,6 +18,18 @@ public class PlayFairCipher {
         this.key = key;
         getPlayFairMatrix(key);
     }
+
+    private String modifyMessage(String message){
+        String modified = "";
+        modified = modified + String.valueOf(message.charAt(0));
+        for(int i=1; i<message.length(); i++){
+            if(message.charAt(i)==message.charAt(i-1)){
+                modified = modified + "X";
+            }
+            modified = modified + String.valueOf(message.charAt(i));
+        }
+        return modified;
+    }
     public void getPlayFairMatrix(String key){
         int stringLength = key.length();
         int stringIndex = 0;
@@ -71,14 +83,44 @@ public class PlayFairCipher {
         return location;
     }
     public char[] getEncryptionPair(char c1, char c2) {
+        char encryptedE1, encryptedE2;
         Point locationC1 = getIndex(c1);
         Point locationC2 = getIndex(c2);
-        char encryptedE1 = this.playFairMatrix[locationC1.x][locationC2.y];
-        char encryptedE2 = this.playFairMatrix[locationC2.x][locationC1.y];
+        if(locationC1.y == locationC2.y){
+            encryptedE1 = this.playFairMatrix[(locationC1.x + 1) % 5][locationC1.y];
+            encryptedE2 = this.playFairMatrix[(locationC2.x + 1) % 5][locationC2.y];
+        }
+        else if(locationC1.x == locationC2.x){
+            encryptedE1 = this.playFairMatrix[locationC1.x][(locationC1.y + 1) % 5];
+            encryptedE2 = this.playFairMatrix[locationC2.x][(locationC2.y + 1) % 5];
+        }
+        else {
+            encryptedE1 = this.playFairMatrix[locationC1.x][locationC2.y];
+            encryptedE2 = this.playFairMatrix[locationC2.x][locationC1.y];
+        }
+        return new char[]{encryptedE1, encryptedE2};
+    }
+    public char[] getDecryptionPair(char c1, char c2) {
+        char encryptedE1, encryptedE2;
+        Point locationC1 = getIndex(c1);
+        Point locationC2 = getIndex(c2);
+        if(locationC1.y == locationC2.y){
+            encryptedE1 = this.playFairMatrix[(locationC1.x - 1) % 5][locationC1.y];
+            encryptedE2 = this.playFairMatrix[(locationC2.x - 1) % 5][locationC2.y];
+        }
+        else if(locationC1.x == locationC2.x){
+            encryptedE1 = this.playFairMatrix[locationC1.x][(locationC1.y - 1) % 5];
+            encryptedE2 = this.playFairMatrix[locationC2.x][(locationC2.y - 1) % 5];
+        }
+        else {
+            encryptedE1 = this.playFairMatrix[locationC1.x][locationC2.y];
+            encryptedE2 = this.playFairMatrix[locationC2.x][locationC1.y];
+        }
         return new char[]{encryptedE1, encryptedE2};
     }
     public String encryptMessage(String message){
         message = message.replaceAll("\\s", "");
+        message = modifyMessage(message);
         int n = message.length();
         String encryptedMessage  = "";
         if (n%2==1){
@@ -99,7 +141,7 @@ public class PlayFairCipher {
             n++;
         }
         for(int i=0; i<n; i+=2){
-            char decryptedPair[] = getEncryptionPair(code.charAt(i), code.charAt(i+1));
+            char decryptedPair[] = getDecryptionPair(code.charAt(i), code.charAt(i+1));
             decryptedMessage = decryptedMessage + String.valueOf(decryptedPair[0]) + String.valueOf(decryptedPair[1]);
         }
         return decryptedMessage;
