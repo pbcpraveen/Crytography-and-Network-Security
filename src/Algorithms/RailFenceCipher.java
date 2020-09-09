@@ -28,6 +28,7 @@ public class RailFenceCipher {
         }
         while(j != 0){
           rail[i][j] = 'X';
+          j = (j + 1) % this.key;
         }
         int m = i;
         for(j=0; j<this.key; j++){
