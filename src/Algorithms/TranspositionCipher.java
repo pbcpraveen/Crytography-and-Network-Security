@@ -36,6 +36,7 @@ public class TranspositionCipher {
         }
         while(j != 0){
             rail[i][j] = 'X';
+            j = (j + 1) % this.keyLength;
         }
         int m = i;
         for(j=0; j<this.keyLength; j++){

@@ -154,7 +154,8 @@ public class HillCipher {
         message = message.replaceAll("\\s", "");
         if(message.length()%this.N !=0){
             String extra = "";
-            for(int i=0; i<message.length()%this.N; i++) extra += "X";
+            int k = this.N - message.length()%this.N;
+            for(int i=0; i<k; i++) extra += "X";
             message += extra;
         }
         String cipherText = "";
