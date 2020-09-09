@@ -16,24 +16,32 @@ public class RailFenceCipher {
     public String encryptMessage(String message){
         message = message.toUpperCase();
         message = message.replaceAll("\\s", "");
+        int r = this.key, len = message.length();
+        int row = 0, col = 0;
+        char mat[][] = new char[r][len];
+        boolean dir = false;
         String encoded = "";
-        char[][] rail = new char[message.length()/this.key + 1][this.key];
-        int i=0, j=0, messageIndex=0;
-        while(messageIndex < message.length()){
-             rail[i][j] = message.charAt(messageIndex);
-             messageIndex++;
-             if(j+1 == this.key)
-                  i++;
-             j = (j + 1) % this.key;
+
+        for(int i = 0;i < r;i++)
+            for(int j = 0;j < len;j++)
+                mat[i][j] = '\0';
+
+        for(int i = 0;i < len;i++) {
+            if(row == 0 || row == this.key - 1)
+                dir = !dir;
+            mat[row][col] = message.charAt(i);
+            col += 1;
+
+            if(dir)
+                row++;
+            else
+                row--;
         }
-        while(j != 0){
-          rail[i][j] = 'X';
-          j = (j + 1) % this.key;
-        }
-        int m = i;
-        for(j=0; j<this.key; j++){
-            for(i=0; i<m; i++){
-                encoded += String.valueOf(rail[i][j]);
+
+        for(int i = 0;i < r;i++) {
+            for(int j = 0;j < len;j++){
+                if(mat[i][j] != '\0')
+                    encoded += mat[i][j];
             }
         }
         return encoded;
@@ -42,22 +50,55 @@ public class RailFenceCipher {
     public String decryptMessage(String message){
         message = message.toUpperCase();
         message = message.replaceAll("\\s", "");
+        int r = this.key, len = message.length();
+        int row = 0, col = 0;
+        boolean dir = false;
+        char mat[][] = new char[r][len];
         String decoded = "";
-        char[][] rail = new char[this.key][message.length()/this.key + 1];
-        int i=0, j=0, messageIndex=0;
-        int columns= message.length()/this.key;
-        while(messageIndex < message.length()){
-            rail[i][j] = message.charAt(messageIndex);
-            messageIndex++;
-            if(j+1 == columns)
-                i++;
-            j = (j + 1) % columns;
+
+        for(int i = 0;i < r;i++)
+            for(int j = 0;j < len;j++)
+                mat[i][j] = '\0';
+
+        for(int i = 0;i < len;i++) {
+            if(row == 0)
+                dir = true;
+            if(row == this.key - 1)
+                dir = false;
+
+            mat[row][col] = '*';
+            col++;
+
+            if(dir)
+                row++;
+            else
+                row--;
         }
-        int m = i;
-        for(j=0; j<columns; j++){
-            for(i=0; i<m; i++){
-                decoded += String.valueOf(rail[i][j]);
+
+        int index = 0;
+        for(int i = 0;i < this.key;i++) {
+            for(int j = 0;j < len;j++) {
+                if(mat[i][j] == '*' && index < len) {
+                    mat[i][j] = message.charAt(index);
+                    index++;
+                }
             }
+        }
+
+        row = 0;
+        col = 0;
+        for(int i = 0;i < len;i++) {
+            if(row == 0) dir = true;
+            if(row == this.key - 1) dir = false;
+
+            if(mat[row][col] != '*') {
+                decoded += mat[row][col];
+                col++;
+            }
+            if(dir)
+                row++;
+            else
+                row--;
         }
         return decoded;
     }
