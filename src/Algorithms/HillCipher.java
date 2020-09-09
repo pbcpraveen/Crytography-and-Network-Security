@@ -89,6 +89,7 @@ public class HillCipher {
     {
         int det = determinant(this.encryptionKey, N);
         det = this.inverse[det%26 >= 0 ? det%26 : det%26 + 26 ];
+        System.out.println(det);
         if (det==-1)
         {
             System.out.print("can't find its inverse");
