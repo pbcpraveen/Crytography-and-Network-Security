@@ -19,7 +19,6 @@ public class TranspositionCipher {
         for(int i=0; i < this.keyLength; i++){
             this.decryptKey[this.key[i] - 1] = i + 1;
         }
-        System.out.print(this.decryptKey);
     }
     public String encryptMessage(String message){
         message = message.toUpperCase();

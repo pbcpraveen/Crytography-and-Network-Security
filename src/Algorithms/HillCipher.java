@@ -1,8 +1,5 @@
 package Algorithms;
 
-import java.security.PrivateKey;
-import java.util.HashSet;
-
 public class HillCipher {
     private int[][] encryptionKey = new int[100][100];
     public int[][] decryptionKey = new int[100][100];
