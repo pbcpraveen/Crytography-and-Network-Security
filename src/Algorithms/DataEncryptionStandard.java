@@ -119,7 +119,7 @@ public class DataEncryptionStandard {
         System.out.println("1. Encode");
         System.out.println("2. Decode");
         System.out.println("3. Exit");
-        System.out.print("Enter your choice:");
+        System.out.print("Enter your choice: ");
     }
 
 

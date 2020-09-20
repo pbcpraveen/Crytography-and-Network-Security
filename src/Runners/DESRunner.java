@@ -27,7 +27,7 @@ public class DESRunner {
                     }
                 }
 
-                System.out.print("Enter the key: ");
+                System.out.println("Enter the key: ");
                 key = in.nextLine();
                 String keyhex = des.ASCIItoHEX(key);
                 int keyBits[] = new int[64];
@@ -42,10 +42,10 @@ public class DESRunner {
                 }
                 String pthex = des.permute(inputBits, keyBits, true);
 
-                System.out.println("The decoded message is: "+ des.hexToASCII(pthex));
+                System.out.println("Plaintext: "+ des.hexToASCII(pthex));
             }
             else if(option==1){
-                System.out.print("Enter the the message to be enoded: ");
+                System.out.println("Enter the the message to be enoded: ");
                 String str = in.nextLine();
                 String strhex = des.ASCIItoHEX(str);
                 int inputBits[] = new int[64];
@@ -59,7 +59,7 @@ public class DESRunner {
                     }
                 }
 
-                System.out.print("Enter the key: ");
+                System.out.println("Enter the key: ");
                 key = in.nextLine();
                 String keyhex = des.ASCIItoHEX(str);
                 int keyBits[] = new int[64];
