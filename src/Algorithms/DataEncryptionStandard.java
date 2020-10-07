@@ -1,7 +1,8 @@
 package Algorithms;
 
 public class DataEncryptionStandard {
-    private final byte[] IP = {
+    // Initial Permutation table
+    private static final byte[] IP = {
             58, 50, 42, 34, 26, 18, 10, 2,
             60, 52, 44, 36, 28, 20, 12, 4,
             62, 54, 46, 38, 30, 22, 14, 6,
@@ -12,7 +13,8 @@ public class DataEncryptionStandard {
             63, 55, 47, 39, 31, 23, 15, 7
     };
 
-    private final byte[] PC1 = {
+    // Permuted Choice 1 table
+    private static final byte[] PC1 = {
             57, 49, 41, 33, 25, 17, 9,
             1,  58, 50, 42, 34, 26, 18,
             10, 2,  59, 51, 43, 35, 27,
@@ -23,7 +25,8 @@ public class DataEncryptionStandard {
             21, 13, 5,  28, 20, 12, 4
     };
 
-    private final byte[] PC2 = {
+    // Permuted Choice 2 table
+    private static final byte[] PC2 = {
             14, 17, 11, 24, 1,  5,
             3,  28, 15, 6,  21, 10,
             23, 19, 12, 4,  26, 8,
@@ -34,10 +37,12 @@ public class DataEncryptionStandard {
             46, 42, 50, 36, 29, 32
     };
 
-    private final byte[] rotations = {
+    // Number of rotations in each round
+    private static final byte[] rotations = {
             1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1
     };
 
+    // Expansion table
     private static final byte[] E = {
             32, 1,  2,  3,  4,  5,
             4,  5,  6,  7,  8,  9,
@@ -50,7 +55,7 @@ public class DataEncryptionStandard {
     };
 
     // S-boxes (i.e. Substitution boxes)
-    private  final byte[][] S = { {
+    private static final byte[][] S = { {
             14, 4,  13, 1,  2,  15, 11, 8,  3,  10, 6,  12, 5,  9,  0,  7,
             0,  15, 7,  4,  14, 2,  13, 1,  10, 6,  12, 11, 9,  5,  3,  8,
             4,  1,  14, 8,  13, 6,  2,  11, 15, 12, 9,  7,  3,  10, 5,  0,
@@ -92,7 +97,8 @@ public class DataEncryptionStandard {
             2,  1,  14, 7,  4,  10, 8,  13, 15, 12, 9,  0,  3,  5,  6,  11
     } };
 
-    private final byte[] P = {
+    // Permutation table
+    private static final byte[] P = {
             16, 7,  20, 21,
             29, 12, 28, 17,
             1,  15, 23, 26,
@@ -103,7 +109,8 @@ public class DataEncryptionStandard {
             22, 11, 4,  25
     };
 
-    private final byte[] FP = {
+    // Inverse permutation table
+    private static final byte[] FP = {
             40, 8, 48, 16, 56, 24, 64, 32,
             39, 7, 47, 15, 55, 23, 63, 31,
             38, 6, 46, 14, 54, 22, 62, 30,
@@ -114,51 +121,51 @@ public class DataEncryptionStandard {
             33, 1, 41, 9, 49, 17, 57, 25
     };
 
-    public void printMenu(){
-        System.out.println("Menu:");
-        System.out.println("1. Encode");
-        System.out.println("2. Decode");
-        System.out.println("3. Exit");
-        System.out.print("Enter your choice: ");
+    // 28 bits each, used as storage in the KS (Key Structure) rounds to
+    private static int[] C = new int[28];
+    private static int[] D = new int[28];
+
+    private static int[][] subkey = new int[16][48];
+
+    public String encryption(int[] inputBits, int[] keyBits) {
+        return this.permute(inputBits, keyBits, false);
     }
 
+    public String decryption(int[] inputBits, int[] keyBits) {
+        return this.permute(inputBits, keyBits, true);
+    }
 
-    private int[] C = new int[28];
-    private int[] D = new int[28];
-
-    private int[][] subkey = new int[16][48];
-
-    public String ASCIItoHEX(String ascii)
-    {
-        String hex = "";
-
-        for (int i = 0; i < ascii.length(); i++) {
-            char ch = ascii.charAt(i);
-            int in = (int)ch;
-            String part = Integer.toHexString(in);
-            hex += part;
+    private static void displayBits(int[] bits) {
+        for(int i=0 ; i < bits.length ; i+=4) {
+            String output = new String();
+            for(int j=0 ; j < 4 ; j++)
+                output += bits[i+j];
+            System.out.print(Integer.toBinaryString(Integer.parseInt(output, 2)));
         }
-        return hex;
+        System.out.println();
     }
 
-    public String hexToASCII(String hex)
-    {
-        String ascii = "";
-        for (int i = 0; i < hex.length(); i += 2) {
-            String part = hex.substring(i, i + 2);
-            char ch = (char)Integer.parseInt(part, 16);
-            ascii = ascii + ch;
+    public void display(boolean isDecrypt) {
+        for(int n=0 ; n < 16 ; n++) {
+            System.out.print("Round " + (n+1) + ": ");
+
+            if(isDecrypt) {
+                System.out.print("Key = ");
+                displayBits(subkey[15-n]);
+            } else {
+                System.out.print("Key = ");
+                displayBits(subkey[n]);
+            }
         }
-        return ascii;
     }
 
-
-
-    public String permute(int[] inputBits, int[] keyBits, boolean isDecrypt) {
+    private static String permute(int[] inputBits, int[] keyBits, boolean isDecrypt) {
+        // Initial permutation step takes input bits and permutes into the newBits array
         int newBits[] = new int[inputBits.length];
         for(int i=0 ; i < inputBits.length ; i++) {
             newBits[i] = inputBits[IP[i]-1];
         }
+
         int L[] = new int[32];
         int R[] = new int[32];
         int i;
@@ -175,11 +182,13 @@ public class DataEncryptionStandard {
 
         for(int n=0 ; n < 16 ; n++) {
             int newR[] = new int[0];
+
             if(isDecrypt) {
                 newR = fiestel(R, subkey[15-n]);
             } else {
                 newR = fiestel(R, KS(n, keyBits));
             }
+
             int newL[] = xor(L, newR);
             L = R;
             R = newL;
@@ -189,43 +198,39 @@ public class DataEncryptionStandard {
         System.arraycopy(R, 0, output, 0, 32);
         System.arraycopy(L, 0, output, 32, 32);
         int finalOutput[] = new int[64];
-        for(i=0 ; i < 64 ; i++) {
+
+        for(i=0 ; i < 64 ; i++)
             finalOutput[i] = output[FP[i]-1];
-        }
 
         String hex = new String();
         for(i=0 ; i < 16 ; i++) {
             String bin = new String();
-            for(int j=0 ; j < 4 ; j++) {
+            for(int j=0 ; j < 4 ; j++)
                 bin += finalOutput[(4*i)+j];
-            }
+
             int decimal = Integer.parseInt(bin, 2);
             hex += Integer.toHexString(decimal);
         }
-        if(isDecrypt) {
-            System.out.print("Decrypted text(Hex): ");
 
-        } else {
-            System.out.print("Encrypted text(Hex): ");
-        }
-        System.out.println(hex);
-        return hex;
+        return hex.toUpperCase();
     }
 
-    private int[] KS(int round, int[] key) {
+    private static int[] KS(int round, int[] key) {
         int C1[] = new int[28];
         int D1[] = new int[28];
 
         int rotationTimes = (int) rotations[round];
+
         C1 = leftShift(C, rotationTimes);
         D1 = leftShift(D, rotationTimes);
+
         int CnDn[] = new int[56];
         System.arraycopy(C1, 0, CnDn, 0, 28);
         System.arraycopy(D1, 0, CnDn, 28, 28);
+
         int Kn[] = new int[48];
-        for(int i=0 ; i < Kn.length ; i++) {
+        for(int i=0 ; i < Kn.length ; i++)
             Kn[i] = CnDn[PC2[i]-1];
-        }
 
         subkey[round] = Kn;
         C = C1;
@@ -233,63 +238,63 @@ public class DataEncryptionStandard {
         return Kn;
     }
 
-    private int[] fiestel(int[] R, int[] roundKey) {
+    private static int[] fiestel(int[] R, int[] roundKey) {
         int expandedR[] = new int[48];
-        for(int i=0 ; i < 48 ; i++) {
+        for(int i=0 ; i < 48 ; i++)
             expandedR[i] = R[E[i]-1];
-        }
+
         int temp[] = xor(expandedR, roundKey);
         int output[] = sBlock(temp);
         return output;
     }
 
-    private int[] xor(int[] a, int[] b) {
+    private static int[] xor(int[] a, int[] b) {
         int answer[] = new int[a.length];
-        for(int i=0 ; i < a.length ; i++) {
+        for(int i=0 ; i < a.length ; i++)
             answer[i] = a[i]^b[i];
-        }
         return answer;
     }
 
-    private  int[] sBlock(int[] bits) {
+    private static int[] sBlock(int[] bits) {
         int output[] = new int[32];
+
         for(int i=0 ; i < 8 ; i++) {
             int row[] = new int [2];
             row[0] = bits[6*i];
             row[1] = bits[(6*i)+5];
             String sRow = row[0] + "" + row[1];
+
             int column[] = new int[4];
             column[0] = bits[(6*i)+1];
             column[1] = bits[(6*i)+2];
             column[2] = bits[(6*i)+3];
             column[3] = bits[(6*i)+4];
             String sColumn = column[0] +""+ column[1] +""+ column[2] +""+ column[3];
+
             int iRow = Integer.parseInt(sRow, 2);
             int iColumn = Integer.parseInt(sColumn, 2);
             int x = S[i][(iRow*16) + iColumn];
             String s = Integer.toBinaryString(x);
-            while(s.length() < 4) {
+
+            while(s.length() < 4)
                 s = "0" + s;
-            }
-            for(int j=0 ; j < 4 ; j++) {
+
+            for(int j=0 ; j < 4 ; j++)
                 output[(i*4) + j] = Integer.parseInt(s.charAt(j) + "");
-            }
         }
         int finalOutput[] = new int[32];
-        for(int i=0 ; i < 32 ; i++) {
+        for(int i=0 ; i < 32 ; i++)
             finalOutput[i] = output[P[i]-1];
-        }
         return finalOutput;
     }
 
-    private int[] leftShift(int[] bits, int n) {
+    private static int[] leftShift(int[] bits, int n) {
         int answer[] = new int[bits.length];
         System.arraycopy(bits, 0, answer, 0, bits.length);
         for(int i=0 ; i < n ; i++) {
             int temp = answer[0];
-            for(int j=0 ; j < bits.length-1 ; j++) {
+            for(int j=0 ; j < bits.length-1 ; j++)
                 answer[j] = answer[j+1];
-            }
             answer[bits.length-1] = temp;
         }
         return answer;
